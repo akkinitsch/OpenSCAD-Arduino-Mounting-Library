@@ -103,7 +103,7 @@ INTERIORMOUNTINGHOLES = 1;
 EXTERIORMOUNTINGHOLES = 2;
 
 //Create a board enclosure
-module enclosure(boardType = UNO, wall = 3, offset = 3, heightExtension = 10, cornerRadius = 3, mountType = TAPHOLE) {
+module enclosure(boardType = UNO, wall = 3, offset = 3, heightExtension = 10, cornerRadius = 3, mountType = TAPHOLE, offsetWidth = 0, offsetDepth = 0, offsetHeight = 0) {
   standOffHeight = 5;
 
   dimensions = boardDimensions(boardType);
@@ -112,16 +112,16 @@ module enclosure(boardType = UNO, wall = 3, offset = 3, heightExtension = 10, co
 
   enclosureWidth = pcbDim[0] + (wall + offset) * 2;
   enclosureDepth = pcbDim[1] + (wall + offset) * 2;
-  enclosureHeight = boardDim[2] + wall + standOffHeight + heightExtension;
+  enclosureHeight = boardDim[2] + wall + standOffHeight + heightExtension + offsetHeight;
 
   union() {
     difference() {
       //Main box shape
-      boundingBox(boardType = boardType, height = enclosureHeight, offset = wall + offset, include=PCB, cornerRadius = wall);
+      boundingBox(boardType = boardType, height = enclosureHeight, offset = wall + offset, include=PCB, cornerRadius = wall, offW = offsetWidth, offD = offsetDepth);
   
       translate([ 0, 0, wall]) {
         //Interior of box
-        boundingBox(boardType = boardType, height = enclosureHeight, offset = offset, include=PCB, cornerRadius = wall);
+        boundingBox(boardType = boardType, height = enclosureHeight, offset = offset, include=PCB, cornerRadius = wall, offW = offsetWidth, offD = offsetDepth);
   
         //Punch outs for USB and POWER
         translate([0, 0, standOffHeight]) {
@@ -131,16 +131,16 @@ module enclosure(boardType = UNO, wall = 3, offset = 3, heightExtension = 10, co
       
       //Holes for lid clips
       translate([0, enclosureDepth * 0.75 - (offset + wall), enclosureHeight]) {
-        translate([-offset, 0, 0])
+        translate([-offset, offsetDepth, 0])
           rotate([0, 180, 90]) clipHole(clipHeight = 10, holeDepth = wall + 0.2);
-        translate([offset + boardDim[0], 0, 0])
+        translate([offset + boardDim[0] + offsetWidth, offsetDepth, 0])
           rotate([0, 180, 270]) clipHole(clipHeight = 10, holeDepth = wall + 0.2);
       }
     
       translate([0, enclosureDepth * 0.25 - (offset + wall), enclosureHeight]) {
         translate([-offset, 0, 0])
           rotate([0, 180, 90]) clipHole(clipHeight = 10, holeDepth = wall + 0.2);
-        translate([offset + dimensions[0], 0, 0])
+        translate([offset + dimensions[0] + offsetWidth, 0, 0])
           rotate([0, 180, 270]) clipHole(clipHeight = 10, holeDepth = wall + 0.2);
       }   
     }
@@ -151,7 +151,7 @@ module enclosure(boardType = UNO, wall = 3, offset = 3, heightExtension = 10, co
 }
 
 //Create a snap on lid for enclosure
-module enclosureLid( boardType = UNO, wall = 3, offset = 3, cornerRadius = 3, ventHoles = false) {
+module enclosureLid( boardType = UNO, wall = 3, offset = 3, cornerRadius = 3, ventHoles = false, offsetWidth = 0, offsetDepth = 0) {
   dimensions = boardDimensions(boardType);
   boardDim = boardDimensions(boardType);
   pcbDim = pcbDimensions(boardType);
@@ -161,23 +161,23 @@ module enclosureLid( boardType = UNO, wall = 3, offset = 3, cornerRadius = 3, ve
 
   difference() {
     union() {
-      boundingBox(boardType = boardType, height = wall, offset = wall + offset, include=PCB, cornerRadius = wall);
+      boundingBox(boardType = boardType, height = wall, offset = wall + offset, include=PCB, cornerRadius = wall, offW = offsetWidth, offD = offsetDepth);
 
       translate([0, 0, -wall * 0.5])
-        boundingBox(boardType = boardType, height = wall * 0.5, offset = offset - 0.5, include=PCB, cornerRadius = wall);
+        boundingBox(boardType = boardType, height = wall * 0.5, offset = offset - 0.5, include=PCB, cornerRadius = wall, offW = offsetWidth, offD = offsetDepth);
     
       //Lid clips
       translate([0, enclosureDepth * 0.75 - (offset + wall), 0]) {
-        translate([-offset, 0, 0])
+        translate([-offset, offsetDepth, 0])
           rotate([0, 180, 90]) clip(clipHeight = 10);
-        translate([offset + boardDim[0], 0, 0])
+        translate([offset + boardDim[0] + offsetWidth, offsetDepth, 0])
           rotate([0, 180, 270]) clip(clipHeight = 10);
       }
     
       translate([0, enclosureDepth * 0.25 - (offset + wall), 0]) {
         translate([-offset, 0, 0])
           rotate([0, 180, 90]) clip(clipHeight = 10);
-        translate([offset + dimensions[0], 0, 0])
+        translate([offset + dimensions[0] + offsetWidth, 0, 0])
           rotate([0, 180, 270]) clip(clipHeight = 10);
       }
 
@@ -206,7 +206,7 @@ BOARD = 0;        //Includes all components and PCB
 PCB = 1;          //Just the PCB
 COMPONENTS = 2;   //Just the components
 
-module boundingBox(boardType = UNO, offset = 0, height = 0, cornerRadius = 0, include = BOARD) {
+module boundingBox(boardType = UNO, offset = 0, height = 0, cornerRadius = 0, include = BOARD, offW = 0, offD = 0) {
   //What parts are included? Entire board, pcb or just components.
   pos = ([boardPosition(boardType), pcbPosition(boardType), componentsPosition(boardType)])[include];
   dim = ([boardDimensions(boardType), pcbDimensions(boardType), componentsDimensions(boardType)])[include];
@@ -219,8 +219,8 @@ module boundingBox(boardType = UNO, offset = 0, height = 0, cornerRadius = 0, in
         ];
 
   dimensions = [
-        dim[0] + offset * 2, 
-        dim[1] + offset * 2, 
+        dim[0] + offW + offset * 2, 
+        dim[1] + offD + offset * 2, 
         (height == 0 ? dim[2] + offset * 2 : height)
         ];
 
@@ -606,3 +606,5 @@ components = [
 woodscrewHeadRad = 4.6228;  //Number 8 wood screw head radius
 woodscrewThreadRad = 2.1336;    //Number 8 wood screw thread radius
 woodscrewHeadHeight = 2.8448;  //Number 8 wood screw head height
+
+enclosure(offsetWidth = 0, offsetDepth = 0, offsetHeight = 0);
