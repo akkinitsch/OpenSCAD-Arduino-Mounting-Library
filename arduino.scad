@@ -111,8 +111,8 @@ module enclosure(boardType = UNO, wall = 3, offset = 3, heightExtension = 10, co
   boardDim = boardDimensions(boardType);
   pcbDim = pcbDimensions(boardType);
 
-  enclosureWidth = pcbDim[0] + (wall + offset) * 2;
-  enclosureDepth = pcbDim[1] + (wall + offset) * 2;
+  enclosureWidth = pcbDim[0] + (wall + offset);
+  enclosureDepth = pcbDim[1] + (wall + offset);
   enclosureHeight = boardDim[2] + wall + standOffHeight + heightExtension + offsetHeight;
 
   difference()
@@ -151,26 +151,28 @@ module enclosure(boardType = UNO, wall = 3, offset = 3, heightExtension = 10, co
 	      standoffs(boardType = boardType, height = standOffHeight, mountType = mountType);
 	    }
 	  }
-  }
-  // cutout for lcd display
-  if (lcdWidth > 0 && lcdHeight > 0)
-  {
-  	if (lcdPosition == 0)
-  	//lcd-cutout at front-side
-  	{	
-		translate([(enclosureWidth + offsetWidth - lcdWidth)/2, -wall*4, (enclosureHeight + offsetHeight - lcdHeight)/2 + wall])
-  		{
-  			#cube([lcdWidth, 10, lcdHeight]);
-  		}
-  	}
-  	if (lcdPosition == 1)
-  	{	
-		translate([(enclosureWidth + offsetWidth - lcdWidth)/2, -wall*4, (enclosureHeight + offsetHeight - lcdHeight)/2 + wall])
-  		{
-  			#cube([lcdWidth, 10, lcdHeight]);
-  		}
-  	}
-  }
+
+	  // cutout for lcd display
+	  if (lcdWidth > 0 && lcdHeight > 0)
+	  {
+	  	if (lcdPosition == 0)
+	  	//lcd-cutout at front-side
+	  	{	
+			translate([(enclosureWidth + offsetWidth - lcdWidth - wall - offset)/2, -wall*1.2 + enclosureDepth + offsetDepth, standOffHeight + offsetHeight/2])
+	  		{
+	  			cube([lcdWidth, wall*1.4, lcdHeight]);
+	  		}
+	  	}
+	  	if (lcdPosition == 1)
+	  	//lcd-cutout at back-side
+	  	{	
+			translate([(enclosureWidth + offsetWidth - lcdWidth - wall - offset)/2, -wall*2.3, standOffHeight + offsetHeight/2])
+	  		{
+	  			cube([lcdWidth, wall*1.4, lcdHeight]);
+	  		}
+	  	}
+	  }
+	}
 }
 
 //Create a snap on lid for enclosure
@@ -630,4 +632,4 @@ woodscrewHeadRad = 4.6228;  //Number 8 wood screw head radius
 woodscrewThreadRad = 2.1336;    //Number 8 wood screw thread radius
 woodscrewHeadHeight = 2.8448;  //Number 8 wood screw head height
 
-enclosure(offsetWidth = 0, offsetDepth = 0, offsetHeight = 0, lcdWidth = 10, lcdHeight = 20);
+enclosure(offsetWidth = 0, offsetDepth = 0, offsetHeight = 0, lcdWidth = 0, lcdHeight = 0, lcdPosition=0);
