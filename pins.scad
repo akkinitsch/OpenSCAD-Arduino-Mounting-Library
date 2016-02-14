@@ -80,7 +80,7 @@ module pin(h=10, r=4, lh=3, lt=1, t=0.2, side=false) {
   if (side) {
     pin_horizontal(h, r, lh, lt, t);
   } else {
-    pin_vertical(h, r, lh, lt, t);
+    //pin_vertical(h, r, lh, lt, t);
   }
 }
 
