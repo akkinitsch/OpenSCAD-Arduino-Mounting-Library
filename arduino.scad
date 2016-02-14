@@ -103,7 +103,8 @@ INTERIORMOUNTINGHOLES = 1;
 EXTERIORMOUNTINGHOLES = 2;
 
 //Create a board enclosure
-module enclosure(boardType = UNO, wall = 3, offset = 3, heightExtension = 10, cornerRadius = 3, mountType = TAPHOLE, offsetWidth = 0, offsetDepth = 0, offsetHeight = 0) {
+module enclosure(boardType = UNO, wall = 3, offset = 3, heightExtension = 10, cornerRadius = 3, mountType = TAPHOLE,
+	offsetWidth = 0, offsetDepth = 0, offsetHeight = 0, lcdWidth = 0, lcdHeight = 0, lcdPosition=0) {
   standOffHeight = 5;
 
   dimensions = boardDimensions(boardType);
@@ -114,39 +115,61 @@ module enclosure(boardType = UNO, wall = 3, offset = 3, heightExtension = 10, co
   enclosureDepth = pcbDim[1] + (wall + offset) * 2;
   enclosureHeight = boardDim[2] + wall + standOffHeight + heightExtension + offsetHeight;
 
-  union() {
-    difference() {
-      //Main box shape
-      boundingBox(boardType = boardType, height = enclosureHeight, offset = wall + offset, include=PCB, cornerRadius = wall, offW = offsetWidth, offD = offsetDepth);
-  
-      translate([ 0, 0, wall]) {
-        //Interior of box
-        boundingBox(boardType = boardType, height = enclosureHeight, offset = offset, include=PCB, cornerRadius = wall, offW = offsetWidth, offD = offsetDepth);
-  
-        //Punch outs for USB and POWER
-        translate([0, 0, standOffHeight]) {
-          components(boardType = boardType, offset = 1, extension = wall + offset + 10);
-        }
-      }
-      
-      //Holes for lid clips
-      translate([0, enclosureDepth * 0.75 - (offset + wall), enclosureHeight]) {
-        translate([-offset, offsetDepth, 0])
-          rotate([0, 180, 90]) clipHole(clipHeight = 10, holeDepth = wall + 0.2);
-        translate([offset + boardDim[0] + offsetWidth, offsetDepth, 0])
-          rotate([0, 180, 270]) clipHole(clipHeight = 10, holeDepth = wall + 0.2);
-      }
-    
-      translate([0, enclosureDepth * 0.25 - (offset + wall), enclosureHeight]) {
-        translate([-offset, 0, 0])
-          rotate([0, 180, 90]) clipHole(clipHeight = 10, holeDepth = wall + 0.2);
-        translate([offset + dimensions[0] + offsetWidth, 0, 0])
-          rotate([0, 180, 270]) clipHole(clipHeight = 10, holeDepth = wall + 0.2);
-      }   
-    }
-    translate([0, 0, wall]) {
-      standoffs(boardType = boardType, height = standOffHeight, mountType = mountType);
-    }
+  difference()
+  {
+	  union() {
+	    difference() {
+	      //Main box shape
+	      boundingBox(boardType = boardType, height = enclosureHeight, offset = wall + offset, include=PCB, cornerRadius = wall, offW = offsetWidth, offD = offsetDepth);
+	  
+	      translate([ 0, 0, wall]) {
+	        //Interior of box
+	        boundingBox(boardType = boardType, height = enclosureHeight, offset = offset, include=PCB, cornerRadius = wall, offW = offsetWidth, offD = offsetDepth);
+	  
+	        //Punch outs for USB and POWER
+	        translate([0, 0, standOffHeight]) {
+	          components(boardType = boardType, offset = 1, extension = wall + offset + 10);
+	        }
+	      }
+	      
+	      //Holes for lid clips
+	      translate([0, enclosureDepth * 0.75 - (offset + wall), enclosureHeight]) {
+	        translate([-offset, offsetDepth, 0])
+	          rotate([0, 180, 90]) clipHole(clipHeight = 10, holeDepth = wall + 0.2);
+	        translate([offset + boardDim[0] + offsetWidth, offsetDepth, 0])
+	          rotate([0, 180, 270]) clipHole(clipHeight = 10, holeDepth = wall + 0.2);
+	      }
+	    
+	      translate([0, enclosureDepth * 0.25 - (offset + wall), enclosureHeight]) {
+	        translate([-offset, 0, 0])
+	          rotate([0, 180, 90]) clipHole(clipHeight = 10, holeDepth = wall + 0.2);
+	        translate([offset + dimensions[0] + offsetWidth, 0, 0])
+	          rotate([0, 180, 270]) clipHole(clipHeight = 10, holeDepth = wall + 0.2);
+	      }   
+	    }
+	    translate([0, 0, wall]) {
+	      standoffs(boardType = boardType, height = standOffHeight, mountType = mountType);
+	    }
+	  }
+  }
+  // cutout for lcd display
+  if (lcdWidth > 0 && lcdHeight > 0)
+  {
+  	if (lcdPosition == 0)
+  	//lcd-cutout at front-side
+  	{	
+		translate([(enclosureWidth + offsetWidth - lcdWidth)/2, -wall*4, (enclosureHeight + offsetHeight - lcdHeight)/2 + wall])
+  		{
+  			#cube([lcdWidth, 10, lcdHeight]);
+  		}
+  	}
+  	if (lcdPosition == 1)
+  	{	
+		translate([(enclosureWidth + offsetWidth - lcdWidth)/2, -wall*4, (enclosureHeight + offsetHeight - lcdHeight)/2 + wall])
+  		{
+  			#cube([lcdWidth, 10, lcdHeight]);
+  		}
+  	}
   }
 }
 
@@ -607,4 +630,4 @@ woodscrewHeadRad = 4.6228;  //Number 8 wood screw head radius
 woodscrewThreadRad = 2.1336;    //Number 8 wood screw thread radius
 woodscrewHeadHeight = 2.8448;  //Number 8 wood screw head height
 
-enclosure(offsetWidth = 0, offsetDepth = 0, offsetHeight = 0);
+enclosure(offsetWidth = 0, offsetDepth = 0, offsetHeight = 0, lcdWidth = 10, lcdHeight = 20);
